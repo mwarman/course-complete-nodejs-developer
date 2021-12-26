@@ -1,0 +1,17 @@
+{
+  "name": "notes-app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "Matthew Warman",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "dependencies": {
+    "chalk": "2.4.1",
+    "validator": "10.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.15"
+  }
+}
