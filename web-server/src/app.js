@@ -2,6 +2,9 @@ const path = require('path');
 const express = require('express');
 const hbs = require('hbs');
 
+const geocode = require('./utils/geocode');
+const fetchForecast = require('./utils/forecast');
+
 const app = express();
 
 // configure Express
@@ -38,10 +41,47 @@ app.get('/help', (req, res) => {
 });
 
 app.get('/api/weather', (req, res) => {
-  res.send({
-    location: 'Boise, Idaho',
-    forecast: 'Clear. The temperature is 85 degrees and it feels like 92 degrees.',
+  const { address } = req.query;
+  if (!address) {
+    res.status(400);
+    res.send({
+      error: "Parameter 'address' is required.",
+    });
+    return;
+  }
+
+  geocode(address, (error, { latitude, longitude, location } = {}) => {
+    if (error) {
+      res.status(500);
+      res.send({
+        error,
+      });
+      return;
+    }
+
+    fetchForecast(latitude, longitude, (error, forecast = {}) => {
+      if (error) {
+        res.status(500);
+        res.send({
+          error,
+        });
+        return;
+      }
+
+      const summary = `${forecast.description}. It is currently ${forecast.temperatureActual} degrees. It feels like ${forecast.temperatureApparent} degrees.`;
+      res.send({
+        address,
+        location,
+        forecast,
+        summary: summary,
+      });
+    });
   });
+});
+
+app.get('/api*', (req, res) => {
+  res.status(404);
+  res.end();
 });
 
 app.get('/help/*', (req, res) => {
